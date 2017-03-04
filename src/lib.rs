@@ -10,4 +10,6 @@ mod table;
 mod field;
 
 mod create_schema;
+mod drop_schema;
+mod alert_schema;
 

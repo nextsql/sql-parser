@@ -1,6 +1,6 @@
 use nom::multispace;
 use nom::alphanumeric;
-use super::common::*;
+
 use super::key::*;
 
 #[derive(PartialEq,Debug,Default)]
@@ -11,7 +11,6 @@ pub struct CreateSchema<'a> {
     if_not_exists:bool
 }
 
-
 named!(create_schema<&[u8],CreateSchema>,
        do_parse!(
            tag_no_case!(b"CREATE") >>
@@ -21,10 +20,10 @@ named!(create_schema<&[u8],CreateSchema>,
            if_not_exists:opt!(tag_no_case!("IF NOT EXISTS")) >>
            many0!(multispace) >>
            name:key >>
-               charset:opt!(
+           many0!(multispace) >>
+           charset:opt!(
                    complete!(
                        do_parse!(
-                           
                            opt!(tag_no_case!("DEFAULT")) >>
                            multispace >>
                            tag_no_case!("CHARACTER SET") >>
@@ -39,7 +38,6 @@ named!(create_schema<&[u8],CreateSchema>,
                collation: opt!(
                    complete!(
                        do_parse!(
-                          
                            opt!(tag_no_case!("DEFAULT")) >>
                            multispace >>
                            tag_no_case!("COLLATE") >>
