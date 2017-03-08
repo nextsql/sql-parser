@@ -1,7 +1,7 @@
 /// MYSQL String literal definition
 /// see infomation [https://dev.mysql.com/doc/refman/5.7/en/string-literals.html]
 /// there is full imlplation of mysql(5.7) string parser
-
+/// TODO: non utf(ascii) supported;
 use nom;
 use nom::IResult;
 use nom::IResult::Error;
@@ -179,7 +179,7 @@ fn string_type<'a>(input:&'a[u8]) -> IResult<&'a[u8],StringType<'a>> {
                     return Error(error_position!(ErrorKind::Custom(0), input))
                 }
             },
-
+            
             _ => {
                 if nom::is_space(*chr) {
                     return Done(&input[idx+start_idx..],StringType::NoWrapString(&input[start_idx..idx+start_idx+1]))
@@ -192,7 +192,6 @@ fn string_type<'a>(input:&'a[u8]) -> IResult<&'a[u8],StringType<'a>> {
     }
     IResult::Done(&b""[..],StringType::Binary(&b""[..]))
 }
-
 
 #[test]
 fn test_str() {
