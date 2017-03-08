@@ -7,10 +7,12 @@ use nom::IResult::Incomplete;
 use nom::Needed;
 use nom::ErrorKind;
 
+pub type Number<'a> = &'a[u8];
+
 //[+/-]digit.digit
 //[+/-]digit.digite-12
 //
-pub fn number<'a>(input:&'a[u8]) -> IResult<&'a[u8],&'a[u8]> {
+pub fn number<'a>(input:&'a[u8]) -> IResult<&'a[u8],Number> {
 
     let input_len = input.len();
 
