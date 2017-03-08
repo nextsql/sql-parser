@@ -25,6 +25,8 @@ pub enum StringType<'a> {
     SingleQuoteString(&'a[u8]),
     // X'0F12D'
     SingleQuooteHex(&'a[u8]),
+    //0x
+    Hex(&'a[u8]),
     /// "string"
     DoubleQuoteString(&'a[u8]),
     /// 0b1010101001
@@ -37,7 +39,7 @@ pub enum StringType<'a> {
 
 pub type String<'a> = (StringType<'a>, Option<Charset<'a>>);
 
-fn string_type<'a>(input:&'a[u8]) -> IResult<&'a[u8],StringType<'a>> {
+pub fn string_type<'a>(input:&'a[u8]) -> IResult<&'a[u8],StringType<'a>> {
 
     let input_len = input.len();
 
@@ -77,6 +79,10 @@ fn string_type<'a>(input:&'a[u8]) -> IResult<&'a[u8],StringType<'a>> {
         },
         ('0',Some('b')) => {
             mode = 7;
+            start_idx = 2;
+        },
+        ('0',Some('x')) => {
+            mode = 8;
             start_idx = 2;
         },
         _ => {
@@ -165,7 +171,6 @@ fn string_type<'a>(input:&'a[u8]) -> IResult<&'a[u8],StringType<'a>> {
                 if *chr != '0' as u8 && *chr != '1' as u8 {
                     return Error(error_position!(ErrorKind::Custom(0), input))
                 }
-                
             },
 
             7 => {
@@ -179,7 +184,18 @@ fn string_type<'a>(input:&'a[u8]) -> IResult<&'a[u8],StringType<'a>> {
                     return Error(error_position!(ErrorKind::Custom(0), input))
                 }
             },
-            
+
+            8 => {
+                if nom::is_space(*chr) {
+                    return Done(&input[idx+start_idx..],StringType::Binary(&input[start_idx..idx+start_idx+1]))
+                }
+                if is_end {
+                    return Done(&input[idx+start_idx+1..],StringType::Binary(&input[start_idx..idx+start_idx+1]))
+                }
+                if !nom::is_alphanumeric(*chr) {
+                    return Error(error_position!(ErrorKind::Custom(0), input))
+                }
+            },
             _ => {
                 if nom::is_space(*chr) {
                     return Done(&input[idx+start_idx..],StringType::NoWrapString(&input[start_idx..idx+start_idx+1]))
